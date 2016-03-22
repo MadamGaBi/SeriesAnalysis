@@ -22,7 +22,7 @@ public class Main {
         System.out.println("min " + temp.min());
         System.out.println("max " + temp.max());
 
-//        System.out.println(temp.summaryStatistics());                     // TODO: 18.03.2016
-//        System.out.println(temp.addTemps(new double[]{3, -5, 0.5}));      // TODO: 18.03.2016
+        System.out.println(temp.summaryStatistics());
+        System.out.println(temp.addTemps(new double[]{3, -5, 0.5}));
     }
 }

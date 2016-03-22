@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.List;
+import org.apache.commons.lang.ArrayUtils;
 
 /**
  * Created by GaBi on 17.03.2016.
@@ -8,18 +10,12 @@ public class TemperatureSeriesAnalysis {
     double[] temperatureSeries;
 
     // конструктор без параметров (по умолчанию)
-    public TemperatureSeriesAnalysis() {
-        super();
-    }
+    public TemperatureSeriesAnalysis(){}
 
     // конструктор с параметрами
     public TemperatureSeriesAnalysis(double[] temperatureSeries) {
-        super();
         this.temperatureSeries = temperatureSeries;
         // TODO: 18.03.2016 класс TemperatureSeriesAnalysis должен иметь конструктор с параметром принимающий начальный ряд температур
-        // если в переданном ряде температур, встречается хоть одно значение меньше чем - 273 С,
-        // то все значения из данного ряда не должны добавляться к основному ряду и должно выбрасываться
-        // исключение InputMismatchException
     }
 
     // метод для округления double
@@ -34,15 +30,15 @@ public class TemperatureSeriesAnalysis {
     // Метод double average() вычисляет средние значение температуры. Если ряд пустой генерирует IllegalArgumentException.
     public double average() throws IllegalArgumentException{
 
-        double avarageOfTempSeries;
+        double averageOfTempSeries;
         double sumOfTemp = 0;
 
         if (this.temperatureSeries!=null && this.temperatureSeries.length>0){
             for (int i=0; i<=this.temperatureSeries.length-1; i++){
                 sumOfTemp += this.temperatureSeries[i];
             }
-            avarageOfTempSeries = sumOfTemp/this.temperatureSeries.length;
-            return round(avarageOfTempSeries, 2);
+            averageOfTempSeries = sumOfTemp/this.temperatureSeries.length;
+            return round(averageOfTempSeries, 2);
         } else {
             throw new IllegalArgumentException();
         }
@@ -52,14 +48,14 @@ public class TemperatureSeriesAnalysis {
     // Если ряд пустой генерирует IllegalArgumentException
     public double deviation(){
 
-        double avarageOfTempSeries;
+        double averageOfTempSeries;
         double deviationOfTempSeries;
         double sumOfAvarageOfTempSeries = 0;
 
         if (this.temperatureSeries!=null && this.temperatureSeries.length>0){
-            avarageOfTempSeries = average();
+            averageOfTempSeries = average();
             for (int i=0; i<=this.temperatureSeries.length-1; i++){
-                sumOfAvarageOfTempSeries += Math.pow(2, this.temperatureSeries[i] - avarageOfTempSeries);
+                sumOfAvarageOfTempSeries += Math.pow(2, this.temperatureSeries[i] - averageOfTempSeries);
             }
             deviationOfTempSeries = Math.sqrt(sumOfAvarageOfTempSeries/this.temperatureSeries.length);
             return round(deviationOfTempSeries, 2);
@@ -198,21 +194,42 @@ public class TemperatureSeriesAnalysis {
 
     // Метод int addTemps(double ... temps) добавляет в конец ряда уже имеющихся данных новые значения температур,
     // возвращает суммарное число значений температур.
-    // Структура (массив) используемая в классе TemperatureSeriesAnalysis для хранения уже переданных температур
-    // должна увеличиваться в 2 раза, если в ней нет места для хранения новых значений.
+    // Если в переданном ряде температур, встречается хоть одно значение меньше чем - 273 С,
+    // то все значения из данного ряда не должны добавляться к основному ряду и должно выбрасываться
+    // исключение InputMismatchException
 
-    public int addTemps(double ... temps){
+    public int addTemps(double[] temps){
 
-        int dimensionOfTempSeries = 0;
-        if (this.temperatureSeries!=null){
-        // TODO: 18.03.2016
+        int dimensionOfTempSeries;
+        boolean forbiddenValues = false;
+        if (this.temperatureSeries!=null && temps!=null && this.temperatureSeries.length >= 0 && temps.length >= 0){
+            for (double temp:temps) {
+                if (temp < -273) {
+                    forbiddenValues = true;
+                }
+            }
+            if (!forbiddenValues){
+                double[] newTempSeries = ArrayUtils.addAll(this.temperatureSeries, temps);
+                dimensionOfTempSeries = newTempSeries.length;
+                return dimensionOfTempSeries;
+            } else {
+                throw new InputMismatchException();
+            }
+        } else {
+            throw new IllegalArgumentException();
         }
-        return dimensionOfTempSeries;
     }
 
+    // TempSummaryStatistics summaryStatistics() возвращает immutable экземпляр класса TempSummaryStatistics
+    // в котором содержится информация: - double avgTemp; - double devTemp; - double minTemp; - double maxTemp;
+    // Если ряд пустой генерирует IllegalArgumentException.
+
     TempSummaryStatistics summaryStatistics(){
-            return new TempSummaryStatistics(this.average(), this.deviation(), this.min(), this.max());
-        // TODO: 18.03.2016
+        if (this.temperatureSeries!=null && this.temperatureSeries.length > 0){
+            return new TempSummaryStatistics(average(), deviation(), min(), max());
+        }else {
+            throw new IllegalArgumentException();
         }
+    }
 
 }
